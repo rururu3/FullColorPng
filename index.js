@@ -9,27 +9,56 @@ const colorList = [];
 for(let r = 0; r < 256; r++) {
   for(let g = 0; g < 256; g++) {
     for(let b = 0; b < 256; b++) {
-      colorList.push({
+      let obj = {
         r,
         g,
         b,
         a: 255,
-        l: (Math.max(r, g, b) + Math.min(r, g, b)) / 2,
-      });
+        h: 0,
+        s: 0,
+        l: 0,
+      };
+      // 色相
+      let min = Math.min(r, g, b)
+      let max = Math.max(r, g, b)
+      if(max === r) {
+        obj.h = 60 * ((obj.g - obj.b) / (max - min));
+      }
+      else if(max === g) {
+        obj.h = 60 * ((obj.b - obj.r) / (max - min)) + 120;
+      }
+      else if(max === b) {
+        obj.h = 60 * ((obj.r - obj.g) / (max - min)) + 240;
+      }
+      else {
+        obj.h = 0;
+      }
+      obj.h = (obj.h + 360) % 360;
+
+      // 彩度
+      obj.s = (max + min) / 2;
+      if(obj.s < 128) {
+        obj.s = (max - min) / (max + min);
+      }
+      else {
+        obj.s = (max - min) / (510 - max - min);
+      }
+
+      // 輝度
+      obj.l = (max + min) / 2,
+
+      colorList.push(obj);
     }
   }
 }
 colorList.sort((a, b) => {
-  if(a.l != b.l) {
-    return(a.l - b.l);
+  let sList = ['l', 's', 'h'];
+  for(let i = 0; i < sList.length; i++) {
+    if(a[sList[i]] != b[sList[i]]) {
+      return(a[sList[i]] - b[sList[i]]);
+    }
   }
-  if(a.r != b.r) {
-    return(a.r - b.r);
-  }
-  if(a.g != b.g) {
-    return(a.g - b.g);
-  }
-  return(a.b - b.b);
+  return(0);
 });
 
 sharp({
